@@ -1,0 +1,107 @@
+// Select canvas and set up the rendering context
+const canvas = document.getElementById("artCanvas");
+const ctx = canvas.getContext("2d");
+
+// Set canvas size
+canvas.width = window.innerWidth * 0.9;
+canvas.height = window.innerHeight * 0.9;
+
+// Utility function to generate a random number between min and max
+function random(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+// Function to draw a custom geometric shape
+function drawPolygon({ x, y, sides, size, color, lineWidth }) {
+    ctx.beginPath();
+    ctx.moveTo(x + size * Math.cos(0), y + size * Math.sin(0));
+
+    for (let i = 1; i <= sides; i++) {
+        ctx.lineTo(
+            x + size * Math.cos((i * 2 * Math.PI) / sides),
+            y + size * Math.sin((i * 2 * Math.PI) / sides)
+        );
+    }
+
+    ctx.closePath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    ctx.stroke();
+}
+
+// Function to draw a custom organic shape (random blob)
+function drawBlob({ x, y, radius, color, randomness }) {
+    ctx.beginPath();
+    for (let i = 0; i < Math.PI * 2; i += Math.PI / 8) {
+        let offsetX = Math.cos(i) * (radius + random(-randomness, randomness));
+        let offsetY = Math.sin(i) * (radius + random(-randomness, randomness));
+        if (i === 0) {
+            ctx.moveTo(x + offsetX, y + offsetY);
+        } else {
+            ctx.lineTo(x + offsetX, y + offsetY);
+        }
+    }
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+}
+
+// Function to draw a set of overlapping semi-transparent circles
+function drawLayeredCircles({ x, y, radius, color, alpha, count }) {
+    for (let i = 0; i < count; i++) {
+        ctx.beginPath();
+        ctx.arc(
+            x + random(-radius / 2, radius / 2),
+            y + random(-radius / 2, radius / 2),
+            radius * (1 - i / count),
+            0,
+            Math.PI * 2
+        );
+        ctx.closePath();
+        ctx.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha / (i + 1)})`;
+        ctx.fill();
+    }
+}
+
+// Generate the generative art
+function generateArt() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+
+    // Draw multiple polygons with random attributes
+    for (let i = 0; i < 10; i++) {
+        drawPolygon({
+            x: random(50, canvas.width - 50),
+            y: random(50, canvas.height - 50),
+            sides: Math.floor(random(3, 8)),
+            size: random(20, 100),
+            color: `hsl(${random(0, 360)}, 100%, 70%)`,
+            lineWidth: random(1, 5),
+        });
+    }
+
+    // Draw multiple blobs with random attributes
+    for (let i = 0; i < 5; i++) {
+        drawBlob({
+            x: random(50, canvas.width - 50),
+            y: random(50, canvas.height - 50),
+            radius: random(30, 80),
+            color: `hsl(${random(0, 360)}, 100%, 50%)`,
+            randomness: random(5, 20),
+        });
+    }
+
+    // Draw multiple layered circles with transparency
+    for (let i = 0; i < 7; i++) {
+        drawLayeredCircles({
+            x: random(50, canvas.width - 50),
+            y: random(50, canvas.height - 50),
+            radius: random(20, 60),
+            color: [random(50, 255), random(50, 255), random(50, 255)],
+            alpha: random(0.2, 0.8),
+            count: Math.floor(random(3, 6)),
+        });
+    }
+}
+
+// Run the generative function on page load
+generateArt();
